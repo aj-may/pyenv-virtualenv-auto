@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+set -e
+
+function VERSION {
+  echo '1.0.0'
+}
+
+function HELP {
+  cat <<'EOS'
+USAGE
+
+Add the folowing to your .bash_profile:
+
+    eval "$(pyenv-virtualenv-auto init)"
+EOS
+}
+
+
+function init {
+  cat <<'EOS'
+function _pyenv_virtualenv_auto_hook {
+  local STEP=$(pwd)
+
+  while [ $STEP != "/" ]; do
+    if [ -a $STEP/.python-env ]; then
+      if [ $(cat "$STEP/.python-env") != $(pyenv version-name) ]; then
+        pyenv activate $(cat "$STEP/.python-env")
+      fi
+      return
+    fi
+
+    STEP=$(dirname $STEP)
+  done
+  if pyenv virtualenv-prefix &> /dev/null; then
+    pyenv deactivate
+    unset PYENV_VERSION
+  fi
+}
+
+if ! [[ "$PROMPT_COMMAND" =~ _pyenv_virtualenv_auto_hook ]]; then
+  PROMPT_COMMAND="_pyenv_virtualenv_auto_hook;$PROMPT_COMMAND";
+fi
+EOS
+}
+
+command="$1"
+case "$command" in
+"" | "-h" | "--help" )
+  echo -e "pyenv-virtualenv-auto v$(VERSION)\n\n$(HELP)"
+  exit 0
+  ;;
+"-v" )
+  echo $(VERSION)
+  exit 0
+  ;;
+"init" )
+  init
+  ;;
+esac
