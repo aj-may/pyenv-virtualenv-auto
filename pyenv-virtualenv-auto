@@ -22,12 +22,21 @@ function init {
 function _pyenv_virtualenv_auto_hook {
   local STEP=$(pwd)
 
+  # If virtualenv is deleted, unset env var
+  if ! pyenv version-name &> /dev/null; then
+    unset PYENV_VERSION
+  fi
+
   while [ $STEP != "/" ]; do
     if [ -a $STEP/.python-env ]; then
-      if [ $(cat "$STEP/.python-env") != $(pyenv version-name) ]; then
-        pyenv activate $(cat "$STEP/.python-env")
+      if [ $(cat "$STEP/.python-env") == $(pyenv version-name) ]; then
+        return
       fi
-      return
+
+      if pyenv virtualenvs | grep " $(cat "$STEP/.python-env") " &> /dev/null; then
+        pyenv activate $(cat "$STEP/.python-env")
+        return
+      fi
     fi
 
     STEP=$(dirname $STEP)
