@@ -29,14 +29,17 @@ function _pyenv_virtualenv_auto_hook {
 
   while [ $STEP != "/" ]; do
     if [ -a $STEP/.python-env ]; then
+      if ! pyenv virtualenvs 2> /dev/null | grep " $(cat "$STEP/.python-env") " &> /dev/null; then
+        STEP=$(dirname $STEP)
+        continue
+      fi
+
       if [ $(cat "$STEP/.python-env") == $(pyenv version-name) ]; then
         return
       fi
 
-      if pyenv virtualenvs | grep " $(cat "$STEP/.python-env") " &> /dev/null; then
-        pyenv activate $(cat "$STEP/.python-env")
-        return
-      fi
+      pyenv activate $(cat "$STEP/.python-env")
+      return
     fi
 
     STEP=$(dirname $STEP)
