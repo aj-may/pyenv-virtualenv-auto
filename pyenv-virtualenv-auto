@@ -27,10 +27,10 @@ function _pyenv_virtualenv_auto_hook {
     unset PYENV_VERSION
   fi
 
-  while [ $STEP != "/" ]; do
-    if [ -a $STEP/.python-env ]; then
+  while [ "$STEP" != "/" ]; do
+    if [ -a "$STEP/.python-env" ]; then
       if ! pyenv virtualenvs 2> /dev/null | grep " $(cat "$STEP/.python-env") " &> /dev/null; then
-        STEP=$(dirname $STEP)
+        STEP=$(dirname "$STEP")
         continue
       fi
 
@@ -42,7 +42,7 @@ function _pyenv_virtualenv_auto_hook {
       return
     fi
 
-    STEP=$(dirname $STEP)
+    STEP=$(dirname "$STEP")
   done
   if pyenv virtualenv-prefix &> /dev/null; then
     pyenv deactivate
