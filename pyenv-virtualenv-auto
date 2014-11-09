@@ -28,14 +28,19 @@ function _pyenv_virtualenv_auto_hook {
   fi
 
   while [ "$STEP" != "/" ]; do
-    if [ -a "$STEP/.python-env" ]; then
-      if ! pyenv virtualenvs 2> /dev/null | grep " $(cat "$STEP/.python-env") " &> /dev/null; then
-        STEP=$(dirname "$STEP")
-        continue
-      fi
 
+    # If .python-env file exists
+    if [ -a "$STEP/.python-env" ]; then
+
+      # If environment is already activated then we are done.
       if [ $(cat "$STEP/.python-env") == $(pyenv version-name) ]; then
         return
+      fi
+
+      # If virtualenv does not exists then continue search
+      if ! pyenv versions 2> /dev/null | grep " $(cat "$STEP/.python-env")\$" &> /dev/null; then
+        STEP=$(dirname $STEP)
+        continue
       fi
 
       pyenv activate $(cat "$STEP/.python-env")
